@@ -1,5 +1,4 @@
 #include "chip_8.h"
-#include <fstream>
 
 
 const unsigned int START_ADDRESS = 0x200;
@@ -34,7 +33,7 @@ chip_8::chip_8()
 		memory[FONTSET_START_ADDRESS + i] = fontset[i];
 	}
 
-	randByte = std::uniform_int_distribution<uint8_t>(0, 255U);
+	randByte = std::uniform_int_distribution<int>(0, 255U);
 
 	table[0x0] = &chip_8::Table0;
 	table[0x1] = &chip_8::OP_1nnn;
@@ -120,7 +119,7 @@ void chip_8::LoadROM(char const* filename)
 
 void chip_8::OP_00E0()
 {
-	memset(video, 0, sizeof(video));
+	memset(video, 0, VIDEO_WIDTH * VIDEO_HEIGHT);
 }
 
 void chip_8::OP_00EE()
@@ -179,7 +178,7 @@ void chip_8::OP_6xkk()
 	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 	uint8_t byte = opcode & 0x00FFu;
 
-	registers[Vx] == byte;
+	registers[Vx] = byte;
 }
 
 void chip_8::OP_7xkk()
@@ -316,7 +315,7 @@ void chip_8::OP_Cxkk()
 	uint8_t Vx = (opcode & 0x0F00) >> 8u;
 	uint8_t byte = opcode & 0x00FFu;
 
-	registers[Vx] = randByte(randGen) & byte;
+	registers[Vx] = (static_cast<uint8_t>(randByte(randGen))) & byte;
 }
 
 void chip_8::OP_Dxyn()
@@ -481,7 +480,7 @@ void chip_8::OP_Fx55()
 {
 	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-	for (unsigned int i = 0; i < Vx; i++) {
+	for (unsigned int i = 0; i <= Vx; i++) {
 		memory[index + i] = registers[i];
 	}
 }
@@ -490,7 +489,7 @@ void chip_8::OP_Fx65()
 {
 	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-	for (unsigned int i = 0; i < Vx; i++) {
+	for (unsigned int i = 0; i <= Vx; i++) {
 		registers[i] = memory[index + i];
 	}
 }

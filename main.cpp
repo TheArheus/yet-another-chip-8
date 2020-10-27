@@ -1,43 +1,47 @@
-#include <chrono>
 #include <iostream>
 #include <string>
 #include "chip_8.h"
 #include "Platform.h"
+#undef main
+
 
 int main(int argc, char** argv) {
-	if (argc != 4) {
-		std::cerr << "Usage: " << argv[0] << "<Scale> <Delay> <ROM>" << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-	
-	int videoScale = std::stoi(argv[1]);
-	int cycleDelay = std::stoi(argv[2]);
-	char const* romFilename = argv[3];
+    SDL_Init(SDL_INIT_EVERYTHING);
+    if (argc != 4)
+    {
+        std::cerr << "Usage: " << argv[0] << " <Scale> <Delay> <ROM>\n";
+        std::exit(EXIT_FAILURE);
+    }
 
-	Platform platform("CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
+    int videoScale = std::stoi(argv[1]);
+    int cycleDelay = std::stoi(argv[2]);
+    char const* romFilename = argv[3];
 
-	chip_8 chip8;
-	chip8.LoadROM(romFilename);
+    Platform platform("CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
 
-	int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
+    chip_8 chip8;
+    chip8.LoadROM(romFilename);
 
-	auto lastCycleTime = std::chrono::high_resolution_clock::now();
-	bool quit = false;
+    int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
 
-	while (!quit) {
-		quit = platform.ProcessInput(chip8.keypad);
+    auto lastCycleTime = std::chrono::high_resolution_clock::now();
+    bool quit = false;
 
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
+    while (!quit)
+    {
+        quit = platform.ProcessInput(chip8.keypad);
 
-		if (dt > cycleDelay) {
-			lastCycleTime = currentTime;
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 
-			chip8.Cycle();
+        if (dt > cycleDelay)
+        {
+            lastCycleTime = currentTime;
 
-			platform.Update(chip8.video, videoPitch);
-		}
-	}
+            chip8.Cycle();
 
+            platform.Update(chip8.video, videoPitch);
+        }
+    }
 	return 0;
 }
