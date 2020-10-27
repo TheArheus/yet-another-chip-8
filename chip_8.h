@@ -1,7 +1,12 @@
-#pragma once
+//#pragma once
+#ifndef CHIP_8_H
+#define CHIP_8_H
+
+
 #include <cstdint>
 #include <chrono>
 #include <random>
+#include <fstream>
 
 
 const unsigned int KEY_COUNT = 16;
@@ -72,7 +77,7 @@ private:
 	uint16_t opcode{};
 
 	std::default_random_engine randGen;
-	std::uniform_int_distribution<uint8_t> randByte;
+	std::uniform_int_distribution<int> randByte;
 
 
 	void Table0() {
@@ -85,7 +90,7 @@ private:
 		((*this).*(tableE[opcode & 0x000Fu]))();
 	}
 	void TableF() {
-		((*this).*(tableF[opcode & 0x000Fu]))();
+		((*this).*(tableF[opcode & 0x00FFu]))();
 	}
 	void OP_NULL() {}
 
@@ -97,3 +102,4 @@ private:
 	Chip8Func tableF[0x65 + 1]{ &chip_8::OP_NULL };
 };
 
+#endif
